@@ -1,0 +1,26 @@
+{
+  "anchors": {
+    "trade_button": null,
+    "main_button": null,
+    "equipment_button": null,
+    "purchase_button": null,
+    "max_quantity_button": null,
+    "price_primary": null,
+    "price_secondary": null
+  },
+  "mode_one": {
+    "poll_interval_ms": 500,
+    "items": []
+  },
+  "mode_two": {
+    "poll_interval_ms": 800,
+    "price_anchor": null,
+    "threshold": 0,
+    "operation_high": null,
+    "operation_low": null,
+    "terminate_color": {
+      "coordinate": null,
+      "rgb": [255, 255, 255]
+    }
+  }
+}
