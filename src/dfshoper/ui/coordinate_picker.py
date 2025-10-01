@@ -7,7 +7,7 @@ from typing import Optional, Tuple
 from PySide6.QtCore import QEvent, QPoint, Qt, Signal
 from PySide6.QtGui import QGuiApplication, QPainter, QPen
 from PySide6.QtWidgets import QApplication, QLabel, QWidget
-from pynput import mouse
+from pynput import mouse, keyboard
 
 Coordinate = Tuple[int, int]
 
@@ -21,8 +21,7 @@ class CoordinatePicker(QWidget):
         self.setWindowState(Qt.WindowFullScreen)
         self._pos: Optional[QPoint] = None
         self._listener: Optional[mouse.Listener] = None
-        self._capturing = False
-        self._hint = QLabel("按住并拖拽到目标位置后松开鼠标", self)
+
         self._hint.setStyleSheet("color: white; font-size: 24px; background-color: rgba(0,0,0,150); padding: 8px;")
         self._hint.adjustSize()
         self._hint.move(50, 50)
@@ -38,21 +37,13 @@ class CoordinatePicker(QWidget):
     def _capture_thread(self, delay: float) -> None:
         time.sleep(delay)
 
-        def on_release(x: int, y: int, button: mouse.Button, pressed: bool) -> bool:
-            if not pressed and button == mouse.Button.left:
-                self.coordinateSelected.emit(int(x), int(y))
-                return False
-            return True
 
-        with mouse.Listener(on_click=on_release) as listener:
-            self._listener = listener
-            listener.join()
-        QGuiApplication.postEvent(self, QEvent(QEvent.User))
 
     def event(self, event: QEvent) -> bool:
         if event.type() == QEvent.User:
             self._capturing = False
             self.hide()
+
             return True
         return super().event(event)
 

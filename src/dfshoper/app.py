@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 from typing import List
 
-from PySide6.QtCore import Q_ARG, QMetaObject, QObject, QTimer, Qt, Signal, Slot
+
 from PySide6.QtWidgets import QApplication
 
 from dfshoper.config import AppConfig, ConfigManager
@@ -24,13 +24,6 @@ logging.basicConfig(level=logging.INFO, format="[%(asctime)s] %(levelname)s %(na
 LOGGER = logging.getLogger(__name__)
 
 
-class _StatusEmitter(QObject):
-    statusChanged = Signal(str)
-
-    @Slot(str)
-    def emit_status(self, message: str) -> None:
-        self.statusChanged.emit(message)
-
 
 class Application:
     def __init__(self, config: AppConfig, manager: ConfigManager) -> None:
@@ -40,28 +33,12 @@ class Application:
         self._ocr = OcrEngine(gpu=True)
         self._executor = ActionExecutor()
         self._recorder = ActionRecorder()
-        self._status_emitter = _StatusEmitter()
+
         self._app = QApplication(sys.argv)
         self._window = MainWindow(manager)
         self._window.show()
         self._anchor_picker = CoordinatePicker()
-        self._status_emitter.statusChanged.connect(
-            self._window._status_label.setText,  # type: ignore[attr-defined]
-            Qt.ConnectionType.QueuedConnection,
-        )
-        self._mode_one = ModeOneController(
-            config.anchors,
-            self._capture,
-            self._ocr,
-            self._executor,
-            self._status_async,
-        )
-        self._mode_two = ModeTwoController(
-            self._capture,
-            self._ocr,
-            self._executor,
-            self._status_async,
-        )
+
         self._window._mode_one_widget.startMonitorRequested.connect(self._mode_one.start)  # type: ignore[attr-defined]
         self._window._mode_one_widget.stopMonitorRequested.connect(self._mode_one.stop)  # type: ignore[attr-defined]
         self._window._mode_one_widget.addItemRequested.connect(self._mode_one.add_item)  # type: ignore[attr-defined]
@@ -80,15 +57,7 @@ class Application:
 
     def _status(self, message: str) -> None:
         LOGGER.info(message)
-        QMetaObject.invokeMethod(
-            self._status_emitter,
-            "emit_status",
-            Qt.ConnectionType.QueuedConnection,
-            Q_ARG(str, message),
-        )
 
-    def _status_async(self, message: str) -> None:
-        self._status(message)
 
     def _find_missing_anchors(self) -> List[str]:
         anchors = self._config.anchors
@@ -101,10 +70,7 @@ class Application:
     def _prompt_missing_anchors(self, missing: List[str]) -> None:
         self._window.show_missing_anchor_warning(missing)
         self._missing_anchor_iter = iter(missing)
-        self._anchor_picker.coordinateSelected.connect(
-            self._on_anchor_selected,
-            Qt.ConnectionType.QueuedConnection,
-        )
+
         self._request_next_anchor()
 
     def _request_next_anchor(self) -> None:
@@ -112,7 +78,7 @@ class Application:
             self._current_anchor = next(self._missing_anchor_iter)
         except StopIteration:
             self._anchor_picker.coordinateSelected.disconnect(self._on_anchor_selected)
-            self._status_async("关键坐标配置完成")
+
             return
         anchor_name = self._current_anchor
         friendly = {
@@ -124,7 +90,7 @@ class Application:
             "price_primary": "价格框1",
             "price_secondary": "价格框2",
         }.get(anchor_name, anchor_name)
-        self._status_async(f"请拖动取点：{friendly}")
+
         self._anchor_picker.start_capture()
 
     def _on_anchor_selected(self, x: int, y: int) -> None:
@@ -132,14 +98,14 @@ class Application:
         anchor = getattr(self, "_current_anchor", None)
         if anchor:
             self._manager.update_anchor(anchor, coordinate)
-            self._status_async(f"{anchor} 已更新为 {coordinate}")
+
         self._request_next_anchor()
 
     def _on_record_requested(self, key: str, path: str) -> None:
         threading.Thread(target=self._record_operation, args=(key, Path(path)), daemon=True).start()
 
     def _record_operation(self, key: str, path: Path) -> None:
-        self._status_async(f"录制操作 {key} 将在 3 秒后开始，请准备...")
+
         time.sleep(3)
         self._recorder.start()
         stop_event = threading.Event()
@@ -152,7 +118,7 @@ class Application:
 
         listener = keyboard.Listener(on_press=on_press)
         listener.start()
-        self._status_async("录制中，按 F9 结束")
+
         stop_event.wait()
         script = self._recorder.stop()
         listener.stop()
@@ -160,7 +126,7 @@ class Application:
         operations = getattr(self._window, "_mode_two_operations", {})
         self._mode_two.load_scripts(operations.get("high"), operations.get("low"))
         self._window.load_operations(operations.get("high"), operations.get("low"))
-        self._status_async(f"操作 {key} 已保存: {path}")
+
 
     def run(self) -> int:
         return self._app.exec()

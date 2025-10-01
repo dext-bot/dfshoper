@@ -14,7 +14,6 @@ DFShoper 是一个面向 Windows 的游戏内商城自动化助手。它可以�
 - 🖱️ 两种自动化模式：
   - **模式一：扫货模式** — 监测多个商品的实时价格，低于自定义阈值时自动点击“最高数量”与“购买”按钮。
   - **模式二：策略模式** — 监测价格坐标并依据阈值执行两段录制操作，支持颜色判定终止条件。
-- 🎯 UI 中所有坐标均可通过拖拽取点按钮快速标定。
 - 🎞️ 内置鼠标键盘操作录制与回放。
 
 ## 快速开始
@@ -28,35 +27,7 @@ DFShoper 是一个面向 Windows 的游戏内商城自动化助手。它可以�
    ```
 
 2. 复制 `config/default_config.json` 为 `config/config.json`，按需调整。
-3. 运行程序（任意以下方式均可，均已在 Windows 10 + Python 3.11 环境验证）：
 
-   - 先切换到源码目录并使用模块方式启动：
-
-     ```powershell
-     cd src
-     python -m dfshoper.app
-     ```
-
-   - 或者在仓库根目录下临时加入 `PYTHONPATH` 后启动（PowerShell 示例）：
-
-     ```powershell
-     $env:PYTHONPATH="src"
-     python -m dfshoper.app
-     ```
-
-   - 也可以直接执行入口脚本：
-
-     ```powershell
-     python src/dfshoper/app.py
-     ```
-
-   - 需要更简洁的方式时，可以使用根目录提供的辅助脚本：
-
-     ```powershell
-     python run_app.py
-     ```
-
-     该脚本会自动配置 `PYTHONPATH` 并调用 `python -m dfshoper.app`。
 
 ## 依赖说明
 
