@@ -1,6 +1,6 @@
 # DFShoper 自动低价购入工具
 
-DFShoper 是一个面向 Windows 的游戏内商城自动化助手。它可以使用 GPU 加速的 OCR 识别商品价格，并按照用户配置自动执行扫货或策略化的脚本操作。
+DFShoper 是一个面向 某 Windows 的游戏内商城自动化助手。它可以使用 GPU 加速的 OCR 识别商品价格，并按照用户配置自动执行扫货或策略化的脚本操作。
 
 > **重要提示**
 > - 程序仅用于个人效率提升，请确保遵守目标游戏的用户协议与相关法律法规。
@@ -28,32 +28,19 @@ DFShoper 是一个面向 Windows 的游戏内商城自动化助手。它可以�
    ```
 
 2. 复制 `config/default_config.json` 为 `config/config.json`，按需调整。
-3. 运行程序（任选其一）：
+3. 运行程序：
 
    ```powershell
-   # PowerShell / CMD：先将 src 加入 PYTHONPATH 再以模块方式启动
-   set PYTHONPATH=src
-   python -m dfshoper.app
-   ```
-
-   ```bash
-   # 或者直接指定入口脚本
-   python src/dfshoper/app.py
+python run_app.py
    ```
 
 ## 坐标取点提示
 
-- 点击 UI 中的“取点”按钮后，屏幕会出现全屏半透明取点层。
-- 可以按住左键将取点按钮拖到目标位置再松开，也可以把鼠标移到目标位置后直接按 **F8** 捕获坐标。
-- 取点过程中按下 **Esc** 可以取消本次操作。
+自己看应用内
 
 ## 依赖说明
 
-- `PySide6` — 构建桌面 UI。
-- `easyocr` — OCR 识别，需依赖支持 GPU 的 PyTorch。
-- `mss` — 屏幕截图。
-- `pyautogui`、`pynput` — 自动化输入与录制。
-- `numpy`, `opencv-python-headless` — 图像预处理。
+懒得写
 
 ## 配置文件
 
@@ -71,13 +58,6 @@ DFShoper 是一个面向 Windows 的游戏内商城自动化助手。它可以�
 
 ## 开发
 
-项目采用模块化结构，主要代码位于 `src/dfshoper/`：
+模块个屁 他妈的累死我了 一千行main搞定
 
-- `app.py` — 程序入口。
-- `config.py` — 配置加载与保存。
-- `ui/` — Qt UI 组件。
-- `services/` — OCR、截图、操作录制等服务层。
-- `modes/` — 模式一、模式二的业务逻辑。
-
-欢迎根据自己的游戏和工作流程扩展项目。
 
