@@ -21,12 +21,7 @@ class CoordinatePicker(QWidget):
         self.setWindowState(Qt.WindowFullScreen)
         self._pos: Optional[QPoint] = None
         self._listener: Optional[mouse.Listener] = None
-        self._keyboard_listener: Optional[keyboard.Listener] = None
-        self._capturing = False
-        self._hint = QLabel(
-            "按住并拖拽到目标位置后松开鼠标，或移动鼠标后按 F8 捕获坐标",
-            self,
-        )
+
         self._hint.setStyleSheet("color: white; font-size: 24px; background-color: rgba(0,0,0,150); padding: 8px;")
         self._hint.adjustSize()
         self._hint.move(50, 50)
@@ -42,44 +37,13 @@ class CoordinatePicker(QWidget):
     def _capture_thread(self, delay: float) -> None:
         time.sleep(delay)
 
-        completed = threading.Event()
 
-        def finish(position: Optional[Tuple[int, int]]) -> None:
-            if completed.is_set():
-                return
-            completed.set()
-            if position is not None:
-                self.coordinateSelected.emit(int(position[0]), int(position[1]))
-            QGuiApplication.postEvent(self, QEvent(QEvent.User))
-
-        def on_release(x: int, y: int, button: mouse.Button, pressed: bool) -> bool:
-            if not pressed and button == mouse.Button.left:
-                finish((int(x), int(y)))
-                return False
-            return not completed.is_set()
-
-        def on_key_press(key: keyboard.Key | keyboard.KeyCode) -> bool:
-            if key == keyboard.Key.f8:
-                position = mouse.Controller().position
-                finish((int(position[0]), int(position[1])))
-                return False
-            if key == keyboard.Key.esc:
-                finish(None)
-                return False
-            return not completed.is_set()
-
-        with mouse.Listener(on_click=on_release) as mouse_listener:
-            self._listener = mouse_listener
-            with keyboard.Listener(on_press=on_key_press) as keyboard_listener:
-                self._keyboard_listener = keyboard_listener
-                completed.wait()
 
     def event(self, event: QEvent) -> bool:
         if event.type() == QEvent.User:
             self._capturing = False
             self.hide()
-            self._listener = None
-            self._keyboard_listener = None
+
             return True
         return super().event(event)
 
